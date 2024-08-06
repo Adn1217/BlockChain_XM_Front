@@ -100,3 +100,18 @@
     flex-direction: column;
   }
 }
+
+.form_main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.form_main label {
+  font-weight: bold;
+}
+
+.form_main input {
+  margin: 1rem;
+}

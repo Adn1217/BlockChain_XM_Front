@@ -3,9 +3,10 @@ import '@rainbow-me/rainbowkit/styles.css';
 import type { AppProps } from 'next/app';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, useReadContract } from 'wagmi';
 import {
   arbitrum,
+  avalancheFuji,
   base,
   mainnet,
   optimism,
@@ -16,15 +17,16 @@ import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 const config = getDefaultConfig({
   appName: 'RainbowKit App',
-  projectId: 'YOUR_PROJECT_ID',
-  chains: [
-    mainnet,
-    polygon,
-    optimism,
-    arbitrum,
-    base,
-    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
-  ],
+  projectId: '852f1b76f953eee020e861b7eeaeec7a',
+  // chains: [
+  //   mainnet,
+  //   polygon,
+  //   optimism,
+  //   arbitrum,
+  //   base,
+  //   ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
+  // ],
+  chains: [avalancheFuji],
   ssr: true,
 });
 

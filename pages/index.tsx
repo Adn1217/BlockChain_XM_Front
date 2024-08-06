@@ -2,8 +2,59 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
+import { useReadContract, useWriteContract, useWatchContractEvent } from 'wagmi';
+import { useEffect, useState } from 'react';
+import contract from '../constants.json';
+import { writeContract } from '@wagmi/core'
+
 
 const Home: NextPage = () => {
+
+  const name = "Adrian";
+  const { writeContract } = useWriteContract({})
+  const result = useReadContract({
+    abi: contract.abi,
+    address: contract.address as `0x${string}`,
+    functionName: 'getMessage'
+
+  });
+
+  const [text, setText] = useState("");
+
+  useWatchContractEvent({
+    abi: contract.abi,
+    address: contract.address as `0x${string}`,
+    eventName: 'messageChanged',
+    onLogs(logs) {
+      const newMessage = logs[logs.length - 1]?.args.newMessage;
+      if(newMessage){
+        setText(String(newMessage));
+      }else{
+       result.refetch();
+      }
+      console.log('new Logs: ', logs);
+    }
+
+  });
+  useEffect(() => {
+    if(result.data){
+      console.log(result.data);
+      setText(String(result.data))
+    }
+  }, [result])
+
+  const updateText = (event: any) => {
+    event.preventDefault();
+    const newMessage = event.target[0].value;
+    console.log(newMessage);
+    writeContract({ 
+      abi: contract.abi,
+      address: contract.address as `0x${string}`,
+      functionName: 'setMessage',
+      args: [ newMessage ],
+   })
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -22,8 +73,17 @@ const Home: NextPage = () => {
           Welcome to <a href="">RainbowKit</a> + <a href="">wagmi</a> +{' '}
           <a href="https://nextjs.org">Next.js!</a>
         </h1>
-
-        <p className={styles.description}>
+        <div>
+          <p>{text == "" ? "" : `Hola ${name} el valor es ${text}`}</p>
+          <form onSubmit = {updateText} className={styles.form_main} >
+            <label>Digite el nuevo texto: </label>
+            <input type="text" name="name"></input>
+            <div>
+              <button type="submit">Actualizar mensaje</button>
+            </div>
+          </form>
+        </div>
+        {/* <p className={styles.description}>
           Get started by editing{' '}
           <code className={styles.code}>pages/index.tsx</code>
         </p>
@@ -69,7 +129,7 @@ const Home: NextPage = () => {
               Instantly deploy your Next.js site to a public URL with Vercel.
             </p>
           </a>
-        </div>
+        </div> */}
       </main>
 
       <footer className={styles.footer}>
