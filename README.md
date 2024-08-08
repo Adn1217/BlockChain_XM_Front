@@ -2,11 +2,17 @@ This is a [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Ne
 
 ## Getting Started
 
-First, run the development server:
+1. Copy file **.env.template** as **.env** in the root of the project.
+
+2. Adjust environment variables as in the **.env** accordingly.
+
+3. Run the development server:
 
 ```bash
 npm run dev
 ```
+
+**Note**: You have to have running your backend server before using the front :thumbsup: .
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
