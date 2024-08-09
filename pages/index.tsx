@@ -29,6 +29,7 @@ const Home: NextPage = () => {
   const [text, setText] = useState("");
   const [users, setUsers] = useState("");
   const [lastAmount, setLastAmount] = useState("");
+  const [withdrawHash, setWithdrawHash] = useState("");
 
   useWatchContractEvent({
     abi: contract.abi,
@@ -115,6 +116,44 @@ const Home: NextPage = () => {
     }
 }
 
+async function withdrawAmount(){
+
+    let myHeaders =  new Headers({
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    })
+    let amount = document.getElementById("amount")!.value.trim();
+    let receiver = document.getElementById("receiverPubKey")!.value.trim();
+    let payload = JSON.stringify({
+        amount: Number(amount),
+        receiver: receiver
+      });
+    console.log(amount, receiver)
+    if (Number(amount) && receiver){
+      let requestOptions = {
+      method: 'POST',
+      body: payload,
+      // redirect: 'follow',
+      headers: myHeaders,
+      };
+      try{
+        // let usersData = await fetch(BACKEND_API + "/users/", requestOptions);
+        setWithdrawHash('Espere...')
+        let withdrawData = await fetch(`${BACKEND_API}withdrawals`, requestOptions);
+        // console.log(resp)
+        let withdrawHash = await withdrawData.json();
+        // console.log(users)
+        setWithdrawHash(JSON.stringify(withdrawHash,null, '\t'));
+        return withdrawHash;
+      }catch(err){
+        console.log(err);
+        // console.log('Ha ocurrido un error: ', err.message!);
+      }
+    }else{
+        setWithdrawHash('Ingrese data válida');
+    }
+}
+
   return (
     <div className={styles.container}>
       <Head>
@@ -168,6 +207,28 @@ const Home: NextPage = () => {
           </div>
           <div>
             <p>{text == "" ? "" : `${lastAmount}`}</p>
+          </div>
+        </div>
+        <div>
+          <div>
+              <h2>Realiza un retiro de fondos desde el contrato</h2>
+              <div>
+                <div>
+                  <label>Digite la dirección pública del receptor de los fondos: </label>
+                </div>
+                <input id="receiverPubKey" type="text" name="text"></input>
+                <div>
+                  <label>Digite monto:</label>
+                </div>
+                <input id="amount" type="text" name="text"></input>
+              </div>
+          </div>
+          <div onClick={() =>withdrawAmount()} >
+            {/* <button ><img src={buyCartLogo} className="Delete-logo" alt="deleteAllLogo"/></button> */}
+          <button>Retirar</button>
+          </div>
+          <div>
+            <p>{text == "" ? "" : `${withdrawHash}`}</p>
           </div>
         </div>
         {/* <p className={styles.description}>

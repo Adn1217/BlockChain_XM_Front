@@ -2,11 +2,19 @@ This is a [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Ne
 
 ## Getting Started
 
-1. Copy file **.env.template** as **.env** in the root of the project.
+1. Clone repository.
 
-2. Adjust environment variables as in the **.env** accordingly.
+2. Install dependencies:
 
-3. Run the development server:
+```
+npm install
+```
+
+3. Copy file **.env.template** as **.env** in the root of the project.
+
+4. Adjust environment variables as in the **.env** accordingly.
+
+5. Run the development server:
 
 ```bash
 npm run dev
