@@ -14,6 +14,7 @@ dotenv.config({
 
 // console.log('BACKEND_URL:', process.env.NEXT_PUBLIC_BACKEND_URL)
 const BACKEND_API = process.env.NEXT_PUBLIC_BACKEND_URL;
+const XMMAIN_CONTRACT = process.env.NEXT_PUBLIC_XMMAIN_ADDRESS
 
 const Home: NextPage = () => {
 
@@ -46,6 +47,8 @@ const Home: NextPage = () => {
     }
 
   });
+
+
   useEffect(() => {
     if(result.data){
       // console.log(result.data);
@@ -63,6 +66,19 @@ const Home: NextPage = () => {
       functionName: 'setMessage',
       args: [ newMessage ],
    })
+  }
+
+    const withdrawWithWallet = () => {
+    let amount = document.getElementById("amount")!.value.trim();
+    let receiver = document.getElementById("receiverPubKey")!.value.trim();
+    writeContract({ 
+      abi: contract.abiMain,
+      address: XMMAIN_CONTRACT as `0x${string}`,
+      functionName: 'withdraw',
+      args: [ receiver as `0x${string}`, Number(amount) ],
+    })
+    setWithdrawHash('En el momento el contrato no tiene emisión de hash. Verifique con el saldo de la cuenta destino.')
+        
   }
 
   async function consultUsers(){
@@ -172,9 +188,9 @@ async function withdrawAmount(){
           Welcome to <a href="">RainbowKit</a> + <a href="">wagmi</a> +{' '}
           <a href="https://nextjs.org">Next.js!</a>
         </h1>
-        <div>
+        <div className={styles.message}>
           <h2>Actualiza en tiempo real en mensaje desde contrato BlockChain</h2>
-          <p>{text == "" ? "" : `Hola ${name} el mensaje actual es: ${text}`}</p>
+          <p>{text == "" ? "" : `Hola ${name} el mensaje actual es: "${text}"`}</p>
           <form onSubmit = {updateText} className={styles.form_main} >
             <label>Digite el nuevo texto: </label>
             <input type="text" name="name"></input>
@@ -183,36 +199,37 @@ async function withdrawAmount(){
             </div>
           </form>
         </div>
-        <div>
-            <label>Usuarios:</label>
+        <div className={styles.users}>
+          <h2>Consulta los usuarios en BD</h2>
+            {/* <label>Usuarios:</label> */}
             <div onClick={() =>consultUsers()} >
               {/* <button ><img src={buyCartLogo} className="Delete-logo" alt="deleteAllLogo"/></button> */}
-            <button>Consultar</button>
-          </div>
+            <button id="getUsersButton">Consultar</button>
+            </div>
         </div>
         <div>
           <p>{text == "" ? "" : `${users}`}</p>
         </div>
         <div>
-          <div>
+          <div className={styles.users}>
               <h2>Consulta la última transacción en Contrato BlockChain</h2>
               <div>
                 <label>Digite el correo del usuario: </label>
               </div>
               <input id="email" type="text" name="email"></input>
-          </div>
-          <div onClick={() =>consultLastAmount()} >
-            {/* <button ><img src={buyCartLogo} className="Delete-logo" alt="deleteAllLogo"/></button> */}
-          <button>Consultar</button>
+              <div onClick={() =>consultLastAmount()} >
+              {/* <button ><img src={buyCartLogo} className="Delete-logo" alt="deleteAllLogo"/></button> */}
+                <button>Consultar</button>
+              </div>
           </div>
           <div>
             <p>{text == "" ? "" : `${lastAmount}`}</p>
           </div>
         </div>
-        <div>
-          <div>
+        <div className={styles.withdraws}>
+          <div >
               <h2>Realiza un retiro de fondos desde el contrato</h2>
-              <div>
+              <div className={styles.users}>
                 <div>
                   <label>Digite la dirección pública del receptor de los fondos: </label>
                 </div>
@@ -223,9 +240,15 @@ async function withdrawAmount(){
                 <input id="amount" type="text" name="text"></input>
               </div>
           </div>
-          <div onClick={() =>withdrawAmount()} >
-            {/* <button ><img src={buyCartLogo} className="Delete-logo" alt="deleteAllLogo"/></button> */}
-          <button>Retirar</button>
+          <div className={styles.withdrawsButtons}>
+            <div onClick={() =>withdrawAmount()} >
+              {/* <button ><img src={buyCartLogo} className="Delete-logo" alt="deleteAllLogo"/></button> */}
+            <button>Retirar Web2</button>
+            </div>
+            <div className={styles.bold} onClick={() =>withdrawWithWallet()} >
+              {/* <button ><img src={buyCartLogo} className="Delete-logo" alt="deleteAllLogo"/></button> */}
+            <button>Retirar con Wallet</button>
+            </div>
           </div>
           <div>
             <p>{text == "" ? "" : `${withdrawHash}`}</p>
