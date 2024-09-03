@@ -14,7 +14,9 @@ dotenv.config({
 
 // console.log('BACKEND_URL:', process.env.NEXT_PUBLIC_BACKEND_URL)
 const BACKEND_API = process.env.NEXT_PUBLIC_BACKEND_URL;
-const XMMAIN_CONTRACT = process.env.NEXT_PUBLIC_XMMAIN_ADDRESS
+const XMMAIN_CONTRACT = process.env.NEXT_PUBLIC_XMMAIN_ADDRESS;
+
+const decimals = 1000000000000000000;
 
 const Home: NextPage = () => {
 
@@ -28,6 +30,7 @@ const Home: NextPage = () => {
   });
 
   const [text, setText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState("");
   const [lastAmount, setLastAmount] = useState("");
   const [withdrawHash, setWithdrawHash] = useState("");
@@ -48,6 +51,26 @@ const Home: NextPage = () => {
 
   });
 
+  useWatchContractEvent({
+    abi: contract.abiMain,
+    address: XMMAIN_CONTRACT as `0x${string}`,
+    eventName: 'ack',
+    onLogs(logs) {
+      // const newMessage = logs[logs.length - 1]?.args.message;
+      const newHash = logs[logs.length - 1]?.transactionHash;
+      if(newHash){
+        setWithdrawHash(String(newHash));
+        setIsLoading(false);
+      }else{
+        setWithdrawHash(String(newHash));
+      //  result.refetch();
+      }
+      console.log('New successful action in contract: ', logs);
+    }
+
+  });
+
+
 
   useEffect(() => {
     if(result.data){
@@ -55,7 +78,7 @@ const Home: NextPage = () => {
       setText(String(result.data))
     }
   }, [result])
-
+  
   const updateText = (event: any) => {
     event.preventDefault();
     const newMessage = event.target[0].value;
@@ -69,15 +92,15 @@ const Home: NextPage = () => {
   }
 
     const withdrawWithWallet = () => {
-    let amount = document.getElementById("amount")!.value.trim();
-    let receiver = document.getElementById("receiverPubKey")!.value.trim();
+    let amount = (document.getElementById("amount")! as HTMLInputElement).value.trim();
+    let receiver = (document.getElementById("receiverPubKey")! as HTMLInputElement).value.trim();
     writeContract({ 
       abi: contract.abiMain,
       address: XMMAIN_CONTRACT as `0x${string}`,
       functionName: 'withdraw',
-      args: [ receiver as `0x${string}`, Number(amount) ],
+      args: [ receiver as `0x${string}`, Number(amount)*decimals ],
     })
-    setWithdrawHash('En el momento el contrato no tiene emisión de hash. Verifique con el saldo de la cuenta destino.')
+    setIsLoading(true);
         
   }
 
@@ -106,7 +129,7 @@ const Home: NextPage = () => {
 
   async function consultLastAmount(){
     let myHeaders = new Headers();
-    let email = document.getElementById("email")!.value.trim();
+    let email = (document.getElementById("email")! as HTMLInputElement).value.trim();
     console.log(email)
     // myHeaders.append("apikey", config.myApiKey);
     if (email){
@@ -138,13 +161,13 @@ async function withdrawAmount(){
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     })
-    let amount = document.getElementById("amount")!.value.trim();
-    let receiver = document.getElementById("receiverPubKey")!.value.trim();
+    let amount = (document.getElementById("amount")! as HTMLInputElement).value.trim();
+    let receiver = (document.getElementById("receiverPubKey")! as HTMLInputElement).value.trim();
     let payload = JSON.stringify({
         amount: Number(amount),
         receiver: receiver
       });
-    console.log(amount, receiver)
+    console.log(amount, receiver);
     if (Number(amount) && receiver){
       let requestOptions = {
       method: 'POST',
@@ -154,14 +177,16 @@ async function withdrawAmount(){
       };
       try{
         // let usersData = await fetch(BACKEND_API + "/users/", requestOptions);
-        setWithdrawHash('Espere...')
+        setIsLoading(true);
         let withdrawData = await fetch(`${BACKEND_API}withdrawals`, requestOptions);
         // console.log(resp)
         let withdrawHash = await withdrawData.json();
         // console.log(users)
         setWithdrawHash(JSON.stringify(withdrawHash,null, '\t'));
+        setIsLoading(false);
         return withdrawHash;
       }catch(err){
+        setWithdrawHash('ERROR');
         console.log(err);
         // console.log('Ha ocurrido un error: ', err.message!);
       }
@@ -208,7 +233,7 @@ async function withdrawAmount(){
             </div>
         </div>
         <div>
-          <p>{text == "" ? "" : `${users}`}</p>
+          <p>{users == "" ? "" : `${users}`}</p>
         </div>
         <div>
           <div className={styles.users}>
@@ -223,7 +248,7 @@ async function withdrawAmount(){
               </div>
           </div>
           <div>
-            <p>{text == "" ? "" : `${lastAmount}`}</p>
+            <p>{lastAmount == "" ? "" : `${lastAmount}`}</p>
           </div>
         </div>
         <div className={styles.withdraws}>
@@ -235,7 +260,7 @@ async function withdrawAmount(){
                 </div>
                 <input id="receiverPubKey" type="text" name="text"></input>
                 <div>
-                  <label>Digite monto:</label>
+                  <label>Digite monto [XMCOP]:</label>
                 </div>
                 <input id="amount" type="text" name="text"></input>
               </div>
@@ -251,7 +276,7 @@ async function withdrawAmount(){
             </div>
           </div>
           <div>
-            <p>{text == "" ? "" : `${withdrawHash}`}</p>
+            <>{isLoading ? "Transacción en proceso..." : withdrawHash == "ERROR" ? "Se ha presentado error en la transacción." : withdrawHash == "" ? "": <p><b>Transacción exitosa. <br></br> Hash:</b> {withdrawHash}</p>}</>
           </div>
         </div>
         {/* <p className={styles.description}>
